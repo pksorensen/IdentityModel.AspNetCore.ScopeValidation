@@ -3,6 +3,7 @@
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -26,26 +27,31 @@ namespace Tests
 
         public void Configure(IApplicationBuilder app)
         {
-            if (_principal1 != null)
+            //if (_principal1 != null)
+            //{
+            //    app.UseMiddleware<TestAuthenticationMiddleware>(Options.Create(new TestAuthenticationOptions
+            //    {
+            //        AuthenticationScheme = "scheme1",
+            //        User = _principal1,
+
+            //        AutomaticAuthenticate = _automaticAuthenticate
+            //    }));
+            //}
+
+            //if (_principal2 != null)
+            //{
+            //    app.UseMiddleware<TestAuthenticationMiddleware>(Options.Create(new TestAuthenticationOptions
+            //    {
+            //        AuthenticationScheme = "scheme2",
+            //        User = _principal2,
+
+            //        AutomaticAuthenticate = _automaticAuthenticate
+            //    }));
+            //}
+
+            if (_automaticAuthenticate)
             {
-                app.UseMiddleware<TestAuthenticationMiddleware>(Options.Create(new TestAuthenticationOptions
-                {
-                    AuthenticationScheme = "scheme1",
-                    User = _principal1,
-
-                    AutomaticAuthenticate = _automaticAuthenticate
-                }));
-            }
-
-            if (_principal2 != null)
-            {
-                app.UseMiddleware<TestAuthenticationMiddleware>(Options.Create(new TestAuthenticationOptions
-                {
-                    AuthenticationScheme = "scheme2",
-                    User = _principal2,
-
-                    AutomaticAuthenticate = _automaticAuthenticate
-                }));
+                app.UseAuthentication();
             }
 
             app.AllowScopes(_scopeOptions);
@@ -59,7 +65,35 @@ namespace Tests
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAuthentication();
+
+         
+
+            services.AddAuthentication(o=>
+            {
+                if (_automaticAuthenticate)
+                {
+                    o.DefaultAuthenticateScheme = o.DefaultChallengeScheme = o.DefaultSignInScheme =
+                    _principal1 != null ? "scheme1" : _principal2 != null ? "scheme2" : null;
+                }
+            });
+          //  services.Configure<TestAuthenticationOptions>((o) => { });
+           // services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<TestAuthenticationOptions>, dummy>());
+
+            if (_principal1 != null)
+            {
+                services.AddScheme<TestAuthenticationOptions, TestAuthenticationHandler>("scheme1", (o) =>
+                {
+                    o.User = _principal1;
+                });
+            };
+
+            if (_principal2 != null)
+            {
+                services.AddScheme<TestAuthenticationOptions, TestAuthenticationHandler>("scheme2", (o) =>
+                {
+                    o.User = _principal2;
+                });
+            };
         }
     }
 }

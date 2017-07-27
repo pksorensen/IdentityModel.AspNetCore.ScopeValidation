@@ -38,6 +38,8 @@ namespace Tests
         }
 
         public void ConfigureServices(IServiceCollection services)
-        { }
+        {
+            services.AddAuthentication();
+        }
     }
 }

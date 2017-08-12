@@ -12,7 +12,7 @@ namespace Tests
     public class TestAuthenticationHandler : AuthenticationHandler<TestAuthenticationOptions>
     {
         public TestAuthenticationHandler(
-            IOptionsSnapshot<TestAuthenticationOptions> options, 
+            IOptionsMonitor<TestAuthenticationOptions> options, 
             ILoggerFactory logger,
             UrlEncoder encoder,
             ISystemClock clock) : base(options, logger, encoder, clock)
